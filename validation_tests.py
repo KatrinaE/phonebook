@@ -18,7 +18,6 @@ class PhonebookTestCase(unittest.TestCase):
     def tearDown(self):
         os.remove('phonebook_fixture.pb')
 
-
     # helper methods for ensuring things were/weren't added to files.
     def assert_not_added(self, entry_fields):
         result = self.env.run('cat %s/phonebook_fixture.pb' % self.prefix)
@@ -35,8 +34,8 @@ class CreateTestCase(PhonebookTestCase):
         """
         Create a new phonebook
         """
-        result = self.env.run('python %s/phonebook.py create new_phonebook.pb' \
-                              % self.prefix)
+        result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
+                              ('create new_phonebook.pb'))
         nose.tools.assert_in('Created phonebook named new_phonebook.pb ' + \
                              'in the current directory', result.stdout)
         assert 'new_phonebook.pb' in result.files_created
@@ -65,36 +64,29 @@ class LookupTestCase(PhonebookTestCase):
         """
         Look up a person in a nonexistent phonebook
         """
-        result = self.env.run('python %s/phonebook.py lookup Sarah -b %s/nonexistent.pb' \
-                              % (self.prefix, self.prefix))
-        expected_output = ("No file named %s/nonexistent.pb found." \
-                                        % self.prefix)
+        result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
+                              ('lookup Sarah ') + \
+                              ('-b %s/nonexistent.pb' % self.prefix))
+        expected_output = ("No file named %s/nonexistent.pb found." % self.prefix)
         nose.tools.assert_in(expected_output, result.stdout)
 
     def test_lookup_first_name(self):
         """
         Look up a person in the phonebook by first name
         """
-        result = self.env.run('python %s/phonebook.py lookup Mary -b %s/phonebook_fixture.pb' \
-                              % (self.prefix, self.prefix))
+        result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
+                              ('lookup Mary ') + \
+                              ('-b %s/phonebook_fixture.pb' % self.prefix))
         expected_output = ("Mary Anderson 572 932 1921")
         nose.tools.assert_in(expected_output, result.stdout)
         
-    def test_lookup_last_name(self):
-        """
-        Look up a person in the phonebook by last name
-        """
-        result = self.env.run('python %s/phonebook.py lookup Anderson -b %s/phonebook_fixture.pb' \
-                              % (self.prefix, self.prefix))
-        expected_output = ("Mary Anderson 572 932 1921")
-        nose.tools.assert_in(expected_output, result.stdout)
-
     def test_lookup_multiple_people(self):
         """
         Look up a name held by multiple people in the phonebook
         """
-        result = self.env.run('python %s/phonebook.py lookup Sarah -b %s/phonebook_fixture.pb' \
-                              % (self.prefix, self.prefix))
+        result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
+                              ('lookup Sarah ') + \
+                              ('-b %s/phonebook_fixture.pb' % self.prefix))
         expected_output = 'Sarah Ahmed 432 123 4321\n' + \
                           'Sarah Apple 509 123 4567\n' + \
                           'Sarah Orange 123 456 7980\n'
@@ -104,8 +96,9 @@ class LookupTestCase(PhonebookTestCase):
         """
         Look up a person who's not in the phonebook
         """
-        result = self.env.run('python %s/phonebook.py lookup Peter -b %s/phonebook_fixture.pb' \
-                              % (self.prefix, self.prefix))
+        result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
+                              ('lookup Peter ') + \
+                              ('-b %s/phonebook_fixture.pb' % self.prefix))
         expected_output = "No entries found."
         nose.tools.assert_in(expected_output, result.stdout)
 
@@ -114,8 +107,9 @@ class LookupTestCase(PhonebookTestCase):
         """
         Look up a person by their phone number
         """
-        result = self.env.run('python %s/phonebook.py reverse-lookup "572 932 1921" -b %s/phonebook_fixture.pb' \
-                              % (self.prefix, self.prefix))
+        result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
+                              ('reverse-lookup "572 932 1921" ') + \
+                              ('-b %s/phonebook_fixture.pb' % self.prefix))
         expected_output = "Mary Anderson 572 932 1921"
         nose.tools.assert_in(expected_output, result.stdout)
 
@@ -123,8 +117,9 @@ class LookupTestCase(PhonebookTestCase):
         """
         Look up a number belonging to multiple people
         """
-        result = self.env.run('python %s/phonebook.py reverse-lookup "123 456 7980" -b %s/phonebook_fixture.pb' \
-                              % (self.prefix, self.prefix))
+        result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
+                              ('reverse-lookup "123 456 7980" ') + \
+                              ('-b %s/phonebook_fixture.pb' % self.prefix))
         expected_output = 'Sarah Orange 123 456 7980\n' + \
                           'Bob Orange 123 456 7980\n'
         nose.tools.assert_in(expected_output, result.stdout)
@@ -134,7 +129,9 @@ class AddTestCase(PhonebookTestCase):
         """
         Try to add a person to a nonexistent phonebook
         """
-        result = self.env.run('python %s/phonebook.py add "John Michael" "123 456 789" -b %s/nonexistent.pb'  % (self.prefix, self.prefix))
+        result = self.env.run(('python %s/phonebook.py '% self.prefix) + \
+                              ('add "John Michael" "123 456 7890" ') + \
+                              ('-b %s/nonexistent.pb' % self.prefix))
         expected_output = "No file named %s/nonexistent.pb found." % self.prefix
         nose.tools.assert_in(expected_output, result.stdout)
 
@@ -142,7 +139,8 @@ class AddTestCase(PhonebookTestCase):
         """
         Try to add a person without specifying a phone book
         """
-        result = self.env.run('python %s/phonebook.py add "John Michael" "123 456 789"'  % self.prefix)
+        result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
+                              ('add "John Michael" "123 456 7890" '))
         expected_output = "Please include a phonebook filename."
         nose.tools.assert_in(expected_output, result.stdout)
     
@@ -150,7 +148,9 @@ class AddTestCase(PhonebookTestCase):
         """
         Add a person to a phonebook.
         """
-        result = self.env.run(('python %s/phonebook.py add "John Michael" "123 456 7890" -b %s/phonebook_fixture.pb' % (self.prefix, self.prefix)))
+        result = self.env.run(('python %s/phonebook.py '% self.prefix) + \
+                              ('add "John Michael" "123 456 7890" ') + \
+                              ('-b %s/phonebook_fixture.pb' % self.prefix))
         expected_output = ("Entry 'John Michael 123 456 7890' added to phonebook " + \
                            "%s/phonebook_fixture.pb" % self.prefix)
         nose.tools.assert_in(expected_output, result.stdout)
@@ -166,8 +166,9 @@ class AddTestCase(PhonebookTestCase):
         """
         Try to add an entry without a number.
         """
-        result = self.env.run('python %s/phonebook.py add "John Michael" ' % self.prefix + \
-                              '-b %s/phonebook_fixture.pb' % self.prefix)
+        result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
+                              ('add "John Michael" ') + \
+                              ('-b %s/phonebook_fixture.pb' % self.prefix))
         expected_output = "Please include a phone number."
         nose.tools.assert_in(expected_output, result.stdout)
         entry_fields = ['John Michael']
@@ -177,8 +178,9 @@ class AddTestCase(PhonebookTestCase):
         """
         Try to add an entry with a malformed phone number.
         """
-        result = self.env.run('python %s/phonebook.py add "John Michael" "123 456 abcd" ' % self.prefix + \
-                              '-b %s/phonebook_fixture.pb' % self.prefix)
+        result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
+                              ('add "John Michael" "123 456 abcd" ') + \
+                              ('-b %s/phonebook_fixture.pb' % self.prefix))
         expected_output = "Entry not created: '123 456 abcd' is not a valid phone number."
         nose.tools.assert_in(expected_output, result.stdout)
         entry_fields = ['John Michael', '123 456 abcd']
@@ -189,8 +191,9 @@ class AddTestCase(PhonebookTestCase):
         Try to add a person who is already in the phonebook
         (I'm not sure that this should be illegal - consider changing behavior)
         """
-        result = self.env.run('python %s/phonebook.py add "Mary Anderson" "123 456 7890" ' % self.prefix + \
-                              '-b %s/phonebook_fixture.pb' % (self.prefix))
+        result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
+                              ('add "Mary Anderson" "123 456 7890" ') + \
+                              ('-b %s/phonebook_fixture.pb' % self.prefix))
         expected_output = "Entry not created: Mary Anderson is already in this phonebook."
         nose.tools.assert_in(expected_output, result.stdout)
 
@@ -202,8 +205,9 @@ class ChangeTestCase(PhonebookTestCase):
         """
         Update a person's phone number
         """
-        result = self.env.run('python %s/phonebook.py change "Mary Anderson" "123 456 7890" ' % self.prefix + \
-                              '-b %s/phonebook_fixture.pb' % (self.prefix))
+        result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
+                              ('change "Mary Anderson" "123 456 7890" ') + \
+                              ('-b %s/phonebook_fixture.pb' % self.prefix))
         expected_output = "Mary Anderson's phone number changed from " + \
                           "572 932 1921 to 123 456 7890."
         nose.tools.assert_in(expected_output, result.stdout)
@@ -215,8 +219,9 @@ class ChangeTestCase(PhonebookTestCase):
         """
         Try to update the phone number of a person who does not exist
         """
-        result = self.env.run('python %s/phonebook.py change "Bobby Goodgame" "999 999 9999" ' % self.prefix + \
-                              '-b %s/phonebook_fixture.pb' % (self.prefix))
+        result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
+                              ('change "Bobby Goodgame" "999 999 9999" ') + \
+                              ('-b %s/phonebook_fixture.pb' % self.prefix))
         expected_output = "Bobby Goodgame is not in this phonebook. " + \
                           "Use 'add' instead."
         nose.tools.assert_in(expected_output, result.stdout)
@@ -227,8 +232,9 @@ class ChangeTestCase(PhonebookTestCase):
         """
         Try to change a person's number to a malformed phone number
         """
-        result = self.env.run('python %s/phonebook.py change "Mary Anderson" "bad number" ' % self.prefix + \
-                              '-b %s/phonebook_fixture.pb' % (self.prefix))
+        result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
+                              ('change "Mary Anderson" "bad number" ') + \
+                              ('-b %s/phonebook_fixture.pb' % self.prefix))
         expected_output = "Entry not created: 'bad number' is not a valid phone number."
         nose.tools.assert_in(expected_output, result.stdout)
 
@@ -241,7 +247,7 @@ class RemoveTestCase(PhonebookTestCase):
         """
         result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
                               ('remove "Mary Anderson" ') + \
-                              ('-b %s/phonebook_fixture.pb' % (self.prefix)))
+                              ('-b %s/phonebook_fixture.pb' % self.prefix))
         expected_output = "Removed Mary Anderson from %s/phonebook_fixture.pb." % self.prefix
         nose.tools.assert_in(expected_output, result.stdout)
         self.assert_not_added(["Mary Anderson"])
@@ -254,7 +260,7 @@ class RemoveTestCase(PhonebookTestCase):
         self.assert_not_added(["Nonexistent person"])
         result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
                               ('remove "Nonexistent person" ') + \
-                              ('-b %s/phonebook_fixture.pb' % (self.prefix)))
+                              ('-b %s/phonebook_fixture.pb' % self.prefix))
         expected_output = "Could not remove: there is no one in %s/" % self.prefix + \
                           "phonebook_fixture.pb named 'Nonexistent person'."
         nose.tools.assert_in(expected_output, result.stdout)
@@ -266,7 +272,7 @@ class RemoveTestCase(PhonebookTestCase):
         """
         result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
                               ('remove "Nonexistent person" ') + \
-                              ('-b %s/phonebook_fixture.pb' % (self.prefix)))
+                              ('-b %s/phonebook_fixture.pb' % self.prefix))
         expected_output = "Could not remove: there is no one in %s/" % self.prefix + \
                           "phonebook_fixture.pb named 'Nonexistent person'."
         nose.tools.assert_in(expected_output, result.stdout)
