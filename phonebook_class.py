@@ -27,7 +27,7 @@ class Phonebook(object):
         else:
             # create storage file
             with open(self.filename, 'wb') as output_file:
-                fieldnames = ['First Name', 'Last Name', 'Phone Number']
+                fieldnames = ['Name', 'Phone Number']
                 csvwriter = csv.DictWriter(output_file, fieldnames)
                 csvwriter.writerow(dict((fn, fn) for fn in fieldnames))
                 return ("created phonebook %s in the current directory" % self.filename)
@@ -39,12 +39,11 @@ class Phonebook(object):
         """
         output = ''
         for person in self.people:
-            full_name = ' '.join((person.first_name, person.last_name))
-            if search_name in full_name:
+            if search_name in person.name:
                 # not sure I really like returning 'output' here.
                 # I'd like to just print things as they come up,
                 # but this is easier to test.
-                person_string = ' '.join([person.first_name, person.last_name, str(person.phone_number)])
+                person_string = ' '.join([person.name, str(person.phone_number)])
                 if output == '':
                     output = person_string
                 else:
@@ -56,15 +55,7 @@ class Phonebook(object):
             return output
 
     def add(self, name, number):
-        names = name.split()
-        first_name = names[0]
-        if names[1]:
-            # last name might be multiple words
-            last_name = ' '.join(names[1:])
-        else:
-            last_name = None
-        person_dict = { 'First Name' : first_name,
-                        'Last Name' : last_name,
+        person_dict = { 'Name' : name,
                         'Phone Number' : number
                         }
         p = Person(person_dict)

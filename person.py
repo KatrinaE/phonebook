@@ -26,6 +26,5 @@ def clean_phone_number(formatted_number):
 
 class Person(object):
     def __init__(self, person_dict):
-        self.first_name = person_dict['First Name']
-        self.last_name = person_dict['Last Name']
+        self.name = person_dict['Name']
         self.phone_number = clean_phone_number(person_dict['Phone Number'])

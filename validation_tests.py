@@ -19,7 +19,7 @@ class CreateTestCase(PhonebookTestCase):
         nose.tools.assert_in('created phonebook new_phonebook.pb ' + \
                              'in the current directory', result.stdout)
         assert 'new_phonebook.pb' in result.files_created
-        for fieldname in ('First Name', 'Last Name', 'Phone Number'):
+        for fieldname in ('Name', 'Phone Number'):
             assert fieldname in result.files_created['new_phonebook.pb']
 
     
