@@ -7,7 +7,16 @@ class PhonebookTestCase(unittest.TestCase):
     def setUp(self):
         self.env = TestFileEnvironment('./scratch')
         self.prefix = os.getcwd()
-        self.phonebook = 'hsphonebook.pb'
+        
+        # load phonebook fixture. Need to use separate name to prevent
+        # overwriting actual file.
+        with open('hsphonebook.pb') as f:
+            with open('phonebook_fixture.pb', 'wb') as phonebook_fixture:
+                for line in f:
+                    phonebook_fixture.write(line)
+
+    def tearDown(self):
+        os.remove('phonebook_fixture.pb')
 
 class CreateTestCase(PhonebookTestCase):
     def test_create(self):
@@ -16,10 +25,10 @@ class CreateTestCase(PhonebookTestCase):
         """
         result = self.env.run('python %s/phonebook.py create new_phonebook.pb' \
                               % self.prefix)
-        nose.tools.assert_in('created phonebook new_phonebook.pb ' + \
+        nose.tools.assert_in('Created phonebook named new_phonebook.pb ' + \
                              'in the current directory', result.stdout)
         assert 'new_phonebook.pb' in result.files_created
-        for fieldname in ('Name', 'Phone Number'):
+        for fieldname in ('name', 'phone_number'):
             assert fieldname in result.files_created['new_phonebook.pb']
 
     
@@ -76,9 +85,9 @@ class LookupTestCase(PhonebookTestCase):
                               % (self.prefix, self.prefix))
         # not sure what the deal is with needing to do this weird indentation
         expected_output = \
-"""Sarah Ahmed 432 123 4321 
-Sarah Apple 509 123 4567 
-Sarah Orange 123 456 7890 
+"""Sarah Ahmed 432 123 4321
+Sarah Apple 509 123 4567
+Sarah Orange 123 456 7890
 """
         nose.tools.assert_in(expected_output, result.stdout)
 
@@ -108,28 +117,21 @@ class AddTestCase(PhonebookTestCase):
         expected_output = "Please include a phonebook filename."
         nose.tools.assert_in(expected_output, result.stdout)
     
-    def test_add_two_names(self):
+    def test_add(self):
         """
-        Add a person with both first & last names to a phone book
+        Add a person to a phonebook.
         """
-        result = self.env.run('python %s/phonebook.py add "John Michael" "123 456 7890" -b %s/phonebook_fixture.pb' % (self.prefix, self.prefix))
-        expected_output = "Entry 'John Michael 123 456 789' added to phonebook phonebook_fixture.pb"
+        result = self.env.run(('python %s/phonebook.py add "John Michael" "123 456 7890" -b %s/phonebook_fixture.pb' % (self.prefix, self.prefix)))
+        expected_output = "Entry 'John Michael 123 456 7890' added to phonebook phonebook_fixture.pb"
         nose.tools.assert_in(expected_output, result.stdout)
-        # TODO: make sure names go in correct fields!!
-        # check that file was updated
-        for value in ('John', 'Michael', '123 456 789'):
-            assert value in result.files_updated['phonebook_fixture.pb']
 
-    def test_add_one_name(self):
-        """
-        Add a person with only a first name.
-        """
-        result = self.env.run('python %s/phonebook.py add "John" "123 456 7890" -b %s/phonebook_fixture.pb' % (self.prefix, self.prefix))
-        expected_output = "Entry 'John 123 456 789' added to phonebook phonebook_fixture.pb"
-        nose.tools.assert_in(expected_output, result.stdout)
         # check that file was updated
-        for value in ('John', '123 456 789'):
-            assert value in result.files_updated['phonebook_fixture.pb']
+        # for some reason this doesn't work - result.files_updated is empty:
+        # assert 'phonebook_fixture.pb' in result.files_updated
+        # fall back on manually viewing the file.
+        result = self.env.run('cat %s/phonebook_fixture.pb' % self.prefix)
+        for value in ('John Michael', '123 456 7890'):
+            nose.tools.assert_in(value, result.stdout)
 
     def test_add_no_number(self):
         """

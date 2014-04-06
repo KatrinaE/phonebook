@@ -18,7 +18,7 @@ def clean_phone_number(formatted_number):
     $           # end of string
     ''', re.VERBOSE)
     try:
-        clean_number = ' '.join(phonePattern.search(formatted_number).groups())
+        clean_number = ' '.join(phonePattern.search(formatted_number).groups()).rstrip()
     except AttributeError:
         print "Error: Invalid phone number."
         # TODO: what to return??
@@ -26,5 +26,5 @@ def clean_phone_number(formatted_number):
 
 class Person(object):
     def __init__(self, person_dict):
-        self.name = person_dict['Name']
-        self.phone_number = clean_phone_number(person_dict['Phone Number'])
+        self.name = person_dict['name']
+        self.phone_number = clean_phone_number(person_dict['phone_number'])
