@@ -1,12 +1,16 @@
 import csv
 import sys
 from person import Person
+import config
 from number_regex import clean_number
 
 class Phonebook(object):
     def __init__(self, args):
         self.people = []
-        self.filename = args.book
+        if args.book is not None:
+            self.filename = args.book
+        else:
+            self.filename = config.default_phonebook
         if args.command != 'create':
             self.load_data()
 
