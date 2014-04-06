@@ -1,6 +1,7 @@
 import csv
 import sys
 from person import Person
+from number_regex import clean_number
 
 class Phonebook(object):
     def __init__(self, args):
@@ -24,8 +25,10 @@ class Phonebook(object):
             print ("Not created: file named %s already exists" % filename)
         else:
             self.filename = filename
-            self.save()
-            print("Created phonebook named %s in the current directory" % filename)
+            success_msg = ("Created phonebook named %s in the current directory." % filename)
+            failure_msg = ("System error: failed to create phonebook named %s." % filename)
+            self.save(success_msg, failure_msg)
+
  
     def lookup(self, params):
         search_name = params[0]
@@ -35,7 +38,7 @@ class Phonebook(object):
         output = ''
         for person in self.people:
             if search_name in person.name:
-                person_string = person.name + " " + str(person.phone_number)
+                person_string = person.name + " " + str(person.number)
                 print person_string
                 output = '\n'.join([output, person_string])
         if output == '':
@@ -43,42 +46,58 @@ class Phonebook(object):
 
     def add(self, params):
         name = params[0]
-
-        # make sure number was included
-        try:
-            number = params[1]
-        except IndexError:
-            print "Please include a phone number."
-            sys.exit()
+        number = extract_number(params)
+        person = Person(name, number)
 
         # make sure this won't be a duplicate
-        already_in_book = [person.name for person in self.people]
-        if name in already_in_book:
-            print "Entry not created: %s is already in this phonebook." % name
+        if is_duplicate(person.name, self.people):
+            print ("Entry not created: %s " % name) + \
+                "is already in this phonebook."
             sys.exit()
 
-        person_dict = { 'name' : name,
-                        'phone_number' : number
-                        }
-        person = Person(person_dict)
+        self.people.append(person)
+        person_string = person.name + " " + str(person.number)
+        success_msg = ("Entry '%s' added to phonebook %s" % (person_string, self.filename))
+        failure_msg = "System error: failed to add person to phonebook."
+        self.save(success_msg, failure_msg)
 
-        # add to phonebook file
+
+    def change(self, params):
+        name = params[0]
+        number = extract_number(params)
+        
+        if not is_duplicate(name, self.people):
+            print ("%s is not in this phonebook. " % name) + \
+                "Use 'add' instead."
+            sys.exit()
+
+        people_to_change = [p for p in self.people if p.name == name]
+        person_to_change = people_to_change[0]
+        if len(people_to_change) > 1:
+            print ("There are multiple people named %s in %s" % (name, self.filename))
+            sys.exit()
+
+        old_number = person_to_change.number
+        person_to_change.number = number
+        success_msg =  "%s's phone number changed " % person_to_change.name + \
+                       "from %s to %s." % (old_number, person_to_change.number)
+        failure_msg = "System failure: failed to update number."
+        self.save(success_msg, failure_msg)
+
+    def save(self, success_msg, failure_msg):
         try:
-            self.people.append(person)
-            self.save()
-            person_string = person.name + " " + str(person.phone_number)
-            print ("Entry '%s' added to phonebook phonebook_fixture.pb" % person_string)
+            self.execute_save()
+            print success_msg
         except:
-            print "System error: failed to add person to phonebook."
+            print failure_msg
             sys.exit()
 
-
-    def save(self):
+    def execute_save(self):
         # possible optimization: if adding a person,
         # just append to the file rather than rewriting
         # the entire thing
         with open(self.filename, 'wb') as f:
-            fieldnames = ['name', 'phone_number']
+            fieldnames = ['name', 'number']
             csvwriter = csv.DictWriter(f, fieldnames)
             csvwriter.writerow(dict((fn, fn) for fn in fieldnames))
             for p in self.people:
@@ -94,8 +113,25 @@ class Phonebook(object):
                 person_dicts = [row for row in reader]
             if person_dicts is not []:
                 for person in person_dicts: 
-                    p = Person(person)
+                    p = Person.from_dict(person)
                     self.people.append(p)
         except IOError:
             print ('No file named %s found.' % self.filename)
             sys.exit()
+
+def extract_number(params):
+    """
+    make sure number was included in input
+    """
+    try:
+        number = clean_number(params[1])
+    except IndexError:
+        print "Please include a phone number."
+        sys.exit()
+    return number
+
+def is_duplicate(name, people_list):
+    already_in_book = [p.name for p in people_list]
+    if name in already_in_book:
+        return True
+
