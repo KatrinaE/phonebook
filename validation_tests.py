@@ -219,17 +219,35 @@ class RemoveTestCase(PhonebookTestCase):
         """
         Remove someone from the phonebook
         """
-        pass
+        result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
+                              ('remove "Mary Anderson" ') + \
+                              ('-b %s/phonebook_fixture.pb' % (self.prefix)))
+        expected_output = "Removed Mary Anderson from %s/phonebook_fixture.pb." % self.prefix
+        nose.tools.assert_in(expected_output, result.stdout)
+        self.assert_not_added(["Mary Anderson"])
+
 
     def test_remove_nonexistent(self):
         """
         Try to remove a nonexistent person from the phonebook
         """
-        pass
+        self.assert_not_added(["Nonexistent person"])
+        result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
+                              ('remove "Nonexistent person" ') + \
+                              ('-b %s/phonebook_fixture.pb' % (self.prefix)))
+        expected_output = "Cannot remove: there is no one in %s/" % self.prefix + \
+                          "phonebook_fixture.pb named 'Nonexistent person'."
+        nose.tools.assert_in(expected_output, result.stdout)
+        self.assert_not_added(["Nonexistent person"])
 
     def test_remove_multiple_possibilities(self):
         """
         Try to remove an entry without supplying a unique name.
         """
-        pass
-
+        result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
+                              ('remove "Nonexistent person" ') + \
+                              ('-b %s/phonebook_fixture.pb' % (self.prefix)))
+        expected_output = "Cannot remove: there is no one in %s/" % self.prefix + \
+                          "phonebook_fixture.pb named 'Nonexistent person'."
+        nose.tools.assert_in(expected_output, result.stdout)
+        self.assert_not_added(["Nonexistent person"])

@@ -84,6 +84,22 @@ class Phonebook(object):
         failure_msg = "System failure: failed to update number."
         self.save(success_msg, failure_msg)
 
+
+    def remove(self, params):
+        # Name requires an exact match, i.e. 'John' will not find 'John Smith'
+        name = params[0]
+        try:
+            people_to_remove = [p for p in self.people if p.name == name]
+            person_to_remove = people_to_remove[0]
+        except IndexError:
+            print "Cannot remove: there is no one in %s " % self.filename + \
+                "named '%s'." % name
+            sys.exit()
+        self.people.remove(person_to_remove)
+        success_msg = "Removed %s from %s." % (name, self.filename)
+        failure_msg = "System failure: failed to remove %s from %s." % (name, self.filename)
+        self.save(success_msg, failure_msg)
+
     def save(self, success_msg, failure_msg):
         try:
             self.execute_save()
