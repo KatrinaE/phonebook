@@ -235,7 +235,7 @@ class RemoveTestCase(PhonebookTestCase):
         result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
                               ('remove "Nonexistent person" ') + \
                               ('-b %s/phonebook_fixture.pb' % (self.prefix)))
-        expected_output = "Cannot remove: there is no one in %s/" % self.prefix + \
+        expected_output = "Could not remove: there is no one in %s/" % self.prefix + \
                           "phonebook_fixture.pb named 'Nonexistent person'."
         nose.tools.assert_in(expected_output, result.stdout)
         self.assert_not_added(["Nonexistent person"])
@@ -247,7 +247,7 @@ class RemoveTestCase(PhonebookTestCase):
         result = self.env.run(('python %s/phonebook.py ' % self.prefix) + \
                               ('remove "Nonexistent person" ') + \
                               ('-b %s/phonebook_fixture.pb' % (self.prefix)))
-        expected_output = "Cannot remove: there is no one in %s/" % self.prefix + \
+        expected_output = "Could not remove: there is no one in %s/" % self.prefix + \
                           "phonebook_fixture.pb named 'Nonexistent person'."
         nose.tools.assert_in(expected_output, result.stdout)
         self.assert_not_added(["Nonexistent person"])

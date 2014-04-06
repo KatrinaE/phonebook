@@ -92,7 +92,7 @@ class Phonebook(object):
             people_to_remove = [p for p in self.people if p.name == name]
             person_to_remove = people_to_remove[0]
         except IndexError:
-            print "Cannot remove: there is no one in %s " % self.filename + \
+            print "Could not remove: there is no one in %s " % self.filename + \
                 "named '%s'." % name
             sys.exit()
         self.people.remove(person_to_remove)
@@ -150,4 +150,3 @@ def is_duplicate(name, people_list):
     already_in_book = [p.name for p in people_list]
     if name in already_in_book:
         return True
-

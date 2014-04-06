@@ -1,6 +1,4 @@
 from number_regex import clean_number
-import sys
-
 
 class Person(object):
     def __init__(self, name, number):
