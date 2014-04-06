@@ -109,6 +109,26 @@ class LookupTestCase(PhonebookTestCase):
         expected_output = "No entries found."
         nose.tools.assert_in(expected_output, result.stdout)
 
+
+    def test_reverse_lookup(self):
+        """
+        Look up a person by their phone number
+        """
+        result = self.env.run('python %s/phonebook.py reverse-lookup "572 932 1921" -b %s/phonebook_fixture.pb' \
+                              % (self.prefix, self.prefix))
+        expected_output = "Mary Anderson 572 932 1921"
+        nose.tools.assert_in(expected_output, result.stdout)
+
+    def test_reverse_multiple_people(self):
+        """
+        Look up a number belonging to multiple people
+        """
+        result = self.env.run('python %s/phonebook.py reverse-lookup "123 456 7980" -b %s/phonebook_fixture.pb' \
+                              % (self.prefix, self.prefix))
+        expected_output = 'Sarah Orange 123 456 7980\n' + \
+                          'Bob Orange 123 456 7980\n'
+        nose.tools.assert_in(expected_output, result.stdout)
+
 class AddTestCase(PhonebookTestCase):
     def test_add_no_book(self):
         """

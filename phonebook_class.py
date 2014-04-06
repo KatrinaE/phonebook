@@ -31,13 +31,27 @@ class Phonebook(object):
 
  
     def lookup(self, params):
-        search_name = params[0]
         """
         Looks up a person by name in an existing phonebook
         """
+        search_name = params[0]
         output = ''
         for person in self.people:
             if search_name in person.name:
+                person_string = person.name + " " + str(person.number)
+                print person_string
+                output = '\n'.join([output, person_string])
+        if output == '':
+            print "No entries found."
+
+    def reverse_lookup(self, params):
+        """
+        Looks up a person by phone number in an existing phonebook
+        """
+        search_number = clean_number(params[0])
+        output = ''
+        for person in self.people:
+            if search_number in person.number:
                 person_string = person.name + " " + str(person.number)
                 print person_string
                 output = '\n'.join([output, person_string])

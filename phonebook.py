@@ -16,5 +16,6 @@ if __name__ == '__main__':
     parser = create_parser()
     args = parser.parse_args()
     phonebook = Phonebook(args)
+    args.command = args.command.replace('-','_')
     if phonebook:
         getattr(phonebook, args.command)(args.params)
