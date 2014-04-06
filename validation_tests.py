@@ -106,7 +106,7 @@ class AddTestCase(PhonebookTestCase):
         Try to add a person to a nonexistent phonebook
         """
         result = self.env.run('python %s/phonebook.py add "John Michael" "123 456 789" -b %s/nonexistent.pb'  % (self.prefix, self.prefix))
-        expected_output = "There is no phonebook named nonexistent.pb"
+        expected_output = "No file named %s/nonexistent.pb found." % self.prefix
         nose.tools.assert_in(expected_output, result.stdout)
 
     def test_add_unspecified_book(self):
@@ -146,7 +146,7 @@ class AddTestCase(PhonebookTestCase):
         Try to add an entry with a malformed phone number.
         """
         result = self.env.run('python %s/phonebook.py add "John" "123 456 abcd" -b %s/phonebook_fixture.pb' % (self.prefix, self.prefix))
-        expected_output = "Entry not created: 123 456 abcd is not a valid phone number."
+        expected_output = "Entry not created: '123 456 abcd' is not a valid phone number."
         nose.tools.assert_in(expected_output, result.stdout)
 
     def test_add_duplicate(self):

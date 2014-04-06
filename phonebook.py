@@ -17,4 +17,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     phonebook = Phonebook(args)
     if phonebook:
-        getattr(phonebook, args.command)(*args.params)
+        getattr(phonebook, args.command)(args.params)

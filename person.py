@@ -1,5 +1,5 @@
 import re
-
+import sys
 
 def clean_phone_number(formatted_number):
     """
@@ -20,8 +20,8 @@ def clean_phone_number(formatted_number):
     try:
         clean_number = ' '.join(phonePattern.search(formatted_number).groups()).rstrip()
     except AttributeError:
-        print "Error: Invalid phone number."
-        # TODO: what to return??
+        print "Entry not created: '%s' is not a valid phone number." % formatted_number
+        sys.exit()
     return clean_number
 
 class Person(object):

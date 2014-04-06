@@ -9,7 +9,8 @@ class Phonebook(object):
         if args.command != 'create':
             self.load_data()
 
-    def create(self, filename):
+    def create(self, params):
+        filename = params[0]
         """
         Creates a new, empty phonebook file
         """
@@ -26,7 +27,8 @@ class Phonebook(object):
             self.save()
             print("Created phonebook named %s in the current directory" % filename)
  
-    def lookup(self, search_name):
+    def lookup(self, params):
+        search_name = params[0]
         """
         Looks up a person by name in an existing phonebook
         """
@@ -39,11 +41,28 @@ class Phonebook(object):
         if output == '':
             print "No entries found."
 
-    def add(self, name, number):
+    def add(self, params):
+        name = params[0]
+
+        # make sure number was included
+        try:
+            number = params[1]
+        except IndexError:
+            print "Please include a phone number."
+            sys.exit()
+
+        # make sure this won't be a duplicate
+        already_in_book = [person.name for person in self.people]
+        if name in already_in_book:
+            print "Entry not created: %s is already in this phonebook." % name
+            sys.exit()
+
         person_dict = { 'name' : name,
                         'phone_number' : number
                         }
         person = Person(person_dict)
+
+        # add to phonebook file
         try:
             self.people.append(person)
             self.save()
