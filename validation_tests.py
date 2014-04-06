@@ -18,6 +18,18 @@ class PhonebookTestCase(unittest.TestCase):
     def tearDown(self):
         os.remove('phonebook_fixture.pb')
 
+
+    # helper methods for ensuring things were/weren't added to files.
+    def assert_not_added(self, entry_fields):
+        result = self.env.run('cat %s/phonebook_fixture.pb' % self.prefix)
+        for value in entry_fields:
+            nose.tools.assert_not_in(value, result.stdout)
+
+    def assert_added(self, entry_fields):
+        result = self.env.run('cat %s/phonebook_fixture.pb' % self.prefix)
+        for value in entry_fields:
+            nose.tools.assert_in(value, result.stdout)
+
 class CreateTestCase(PhonebookTestCase):
     def test_create(self):
         """
@@ -127,27 +139,30 @@ class AddTestCase(PhonebookTestCase):
 
         # check that file was updated
         # for some reason this doesn't work - result.files_updated is empty:
-        # assert 'phonebook_fixture.pb' in result.files_updated
+        #      assert 'phonebook_fixture.pb' in result.files_updated
         # fall back on manually viewing the file.
-        result = self.env.run('cat %s/phonebook_fixture.pb' % self.prefix)
-        for value in ('John Michael', '123 456 7890'):
-            nose.tools.assert_in(value, result.stdout)
+        entry_fields =  ('John Michael', '123 456 7890')
+        self.assert_added(entry_fields)
 
     def test_add_no_number(self):
         """
         Try to add an entry without a number.
         """
-        result = self.env.run('python %s/phonebook.py add "John" -b %s/phonebook_fixture.pb' % (self.prefix, self.prefix))
+        result = self.env.run('python %s/phonebook.py add "John Michael" -b %s/phonebook_fixture.pb' % (self.prefix, self.prefix))
         expected_output = "Please include a phone number."
         nose.tools.assert_in(expected_output, result.stdout)
+        entry_fields = ['John Michael']
+        self.assert_not_added(entry_fields)
 
     def test_add_malformed_number(self):
         """
         Try to add an entry with a malformed phone number.
         """
-        result = self.env.run('python %s/phonebook.py add "John" "123 456 abcd" -b %s/phonebook_fixture.pb' % (self.prefix, self.prefix))
+        result = self.env.run('python %s/phonebook.py add "John Michael" "123 456 abcd" -b %s/phonebook_fixture.pb' % (self.prefix, self.prefix))
         expected_output = "Entry not created: '123 456 abcd' is not a valid phone number."
         nose.tools.assert_in(expected_output, result.stdout)
+        entry_fields = ['John Michael', '123 456 abcd']
+        self.assert_not_added(entry_fields)
 
     def test_add_duplicate(self):
         """
@@ -158,6 +173,8 @@ class AddTestCase(PhonebookTestCase):
         expected_output = "Entry not created: Mary Anderson is already in this phonebook."
         nose.tools.assert_in(expected_output, result.stdout)
 
+        result = self.env.run('cat %s/phonebook_fixture.pb' % self.prefix)
+        nose.tools.assert_equal(result.stdout.count('Mary Anderson'), 1)
 
 class ChangeTestCase(PhonebookTestCase):
     def test_change_number(self):
@@ -196,3 +213,4 @@ class RemoveTestCase(PhonebookTestCase):
         Try to remove an entry without supplying a unique name.
         """
         pass
+
