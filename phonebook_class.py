@@ -1,7 +1,7 @@
 import csv
 import sys
+import ConfigParser
 from person import Person
-import config
 from number_regex import clean_number
 
 class Phonebook(object):
@@ -10,7 +10,9 @@ class Phonebook(object):
         if args.book is not None:
             self.filename = args.book
         else:
-            self.filename = config.default_phonebook
+            parser = ConfigParser.SafeConfigParser()
+            parser.read('config.cfg')
+            self.filename =  parser.get('phonebook', 'default_phonebook')
         if args.command != 'create':
             self.load_data()
 
@@ -33,6 +35,18 @@ class Phonebook(object):
             failure_msg = ("System error: failed to create phonebook named %s." % filename)
             self.save(success_msg, failure_msg)
 
+    def set_default(self, params):
+        self.filename = params[0]
+        self.load_data()
+        try:
+            parser = ConfigParser.SafeConfigParser()
+            parser.read('config.cfg')
+            parser.set('phonebook', 'default_phonebook', self.filename)
+            parser.write(open('config.cfg','w'))
+            print "Set default phonebook to %s." % self.filename
+        except:
+            print "Unable to set the default phonebook to %s." % self.filename
+            sys.exit()
  
     def lookup(self, params):
         """
