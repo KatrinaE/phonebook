@@ -1,21 +1,32 @@
 #!/usr/bin/env python
+"""
+Phonebook is a simple phonebook application with a command-line
+interface. Users can create phonebooks, add and remove entries,
+and look people up by name or phone number.
+"""
 import argparse
-import csv
-import sys
 from phonebook_class import Phonebook
-from person import Person
 
 def create_parser():
+    """
+    Create parser to read command-line arguments
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("command", action='store')
     parser.add_argument("params", action='store', nargs='*')
     parser.add_argument("-b", "--book", action="store")
     return parser
 
-if __name__ == '__main__':
+def main():
+    """
+    Parse user request and perform desired phonebook action
+    """
     parser = create_parser()
     args = parser.parse_args()
     phonebook = Phonebook(args)
-    args.command = args.command.replace('-','_')
+    args.command = args.command.replace('-', '_')
     if phonebook:
         getattr(phonebook, args.command)(args.params)
+
+if __name__ == '__main__':
+    main()
